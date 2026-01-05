@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  cortex:
+    build:
+      context: ./cortex
+    ports:
+      - "8001:8000"
+    environment:
+      - MODULE=brain
+      - CELL_URL=http://cell_fire_alarm:8000
+    depends_on:
+      - cell_fire_alarm
+
+  cell_fire_alarm:
+    build:
+      context: ./cell_fire_alarm
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./knowledge_base:/app/knowledge_base # Cell reads protocols directly for now
+    environment:
+      - MODULE=cell
+
+networks:
+  default:
+    name: cicuma_net
