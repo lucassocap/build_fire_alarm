@@ -1,27 +1,66 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  web:
+    build:
+      context: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_CORTEX_URL=http://localhost:8001
+      - NEXTAUTH_SECRET=CicumaFireAlarmSecretKey2026
+      - AUTH_SECRET=CicumaFireAlarmSecretKey2026
+      - AUTH_TRUST_HOST=true
+      - AUTH_URL=http://localhost:3000
+      - NAM_TRUST_HOST=true
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    depends_on:
+      - cortex
+
   cortex:
     build:
       context: ./cortex
     ports:
-      - "8001:8000"
+      - "8001:8080"
+    volumes:
+      - ./cortex:/app
+      - ~/.config/gcloud/application_default_credentials.json:/tmp/keys/creds.json
     environment:
       - MODULE=brain
-      - CELL_URL=http://cell_fire_alarm:8000
+      - CELL_URL=http://cell_fire_alarm:8080
+      - DATABASE_URL=postgresql://cicuma:firealarm@db:5432/fire_alarm_db
+      - GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/creds.json
+      - GCP_PROJECT=cicuma-fire-1767585900
     depends_on:
       - cell_fire_alarm
+      - db
+
+  db:
+    image: ankane/pgvector:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=cicuma
+      - POSTGRES_PASSWORD=firealarm
+      - POSTGRES_DB=fire_alarm_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   cell_fire_alarm:
     build:
       context: ./cell_fire_alarm
     ports:
-      - "8002:8000"
+      - "8002:8080"
     volumes:
-      - ./knowledge_base:/app/knowledge_base # Cell reads protocols directly for now
+      - ./knowledge_base:/app/knowledge_base
     environment:
       - MODULE=cell
 
 networks:
   default:
     name: cicuma_net
+
+volumes:
+  postgres_data:

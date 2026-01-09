@@ -16,7 +16,7 @@ echo "🔥 Cicuma Fire: Starting GCP Deployment Pipeline for project: $PROJECT_I
 
 # 1. Enable Services
 echo "[1/4] Enabling Required APIs..."
-gcloud services enable run.googleapis.com artifactregistry.googleapis.com --project $PROJECT_ID
+# gcloud services enable run.googleapis.com artifactregistry.googleapis.com --project $PROJECT_ID
 
 # 2. Create Artifact Registry (if not exists)
 echo "[2/4] Checking Artifact Registry..."
@@ -76,10 +76,24 @@ gcloud run deploy cicuma-web \
     --region $REGION \
     --allow-unauthenticated \
     --set-env-vars NEXT_PUBLIC_CORTEX_URL=$CORTEX_URL \
-    --set-env-vars AUTH_SECRET="changeme_in_prod" \
+    --set-env-vars AUTH_SECRET="CicumaFireAlarmSecretKey2026" \
+    --set-env-vars NEXTAUTH_SECRET="CicumaFireAlarmSecretKey2026" \
+    --set-env-vars AUTH_TRUST_HOST=true \
+    --set-env-vars AUTH_URL="https://cicuma-web-yp7mw3rcmq-uc.a.run.app" \
+    --set-env-vars GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID}" \
+    --set-env-vars GOOGLE_CLIENT_SECRET="${GOOGLE_CLIENT_SECRET}" \
     --project $PROJECT_ID
 
 WEB_URL=$(gcloud run services describe cicuma-web --platform managed --region $REGION --format 'value(status.url)' --project $PROJECT_ID)
 
 echo "✅ Deployment Complete!"
 echo "🌍 Access the Workbench at: $WEB_URL"
+echo ""
+echo "⚠️  ACTION REQUIRED: COPY-PASTE CONFIGURATION ⚠️"
+echo "To enable Login, you MUST add this URL to your Google Cloud Console:"
+echo "---------------------------------------------------------------"
+echo "URI: $WEB_URL/api/auth/callback/google"
+echo "---------------------------------------------------------------"
+echo ""
+echo "👉 Direct Link: https://console.cloud.google.com/apis/credentials/oauthclient/${GOOGLE_CLIENT_ID}?project=$PROJECT_ID"
+echo ""

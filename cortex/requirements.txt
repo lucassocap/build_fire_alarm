@@ -1,4 +1,13 @@
 fastapi
 uvicorn
 httpx
+pypdf
+python-multipart
 pydantic
+sqlalchemy
+psycopg2-binary
+reportlab
+pandas
+google-cloud-aiplatform
+pgvector
+pdf2image

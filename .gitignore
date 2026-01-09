@@ -18,3 +18,9 @@ yarn-error.log*
 
 # Logs
 *.log
+
+# macOS
+.DS_Store
+
+# Google OAuth credentials
+client_secret_*.json
